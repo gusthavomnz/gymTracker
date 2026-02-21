@@ -25,7 +25,7 @@ public TrainingGroupDTO createTrainingGroup(TrainingGroupDTO trainingGroupDTO){
 
     // CONVERTE A CAPTURA EM DTO PARA RETORNAR
     TrainingGroupDTO responseDTO = new TrainingGroupDTO(
-            savedGroup.getTg_id(),
+            savedGroup.getTgId(),
             savedGroup.getName());
 
     return responseDTO;

@@ -7,14 +7,13 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "trainingGroup")
+@Table(name = "training_groups")
 public class TrainingGroup {
 
-
-    @Column(name = "tg_id")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long tg_id;
+    @Column(name = "tg_id")
+    private long tgId;
 
     @Column(name = "name")
     private String name;

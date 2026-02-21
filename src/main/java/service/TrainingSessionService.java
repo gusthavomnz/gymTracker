@@ -57,15 +57,15 @@ public class TrainingSessionService {
         // Vincula cada série a um exercicio do catalogo(Many-to-one):
         for (ExerciseSetDTO exerciseSetDTO: trainingSessionDTO.getExerciseSets()) {
             ExerciseSet newExerciseSet = new ExerciseSet();
-            newExerciseSet.setNumberSets(exerciseSetDTO.getSetNumber());
+            newExerciseSet.setSetNumber(exerciseSetDTO.getSetNumber());
             newExerciseSet.setWeight(exerciseSetDTO.getWeight());
-            newExerciseSet.setReps(exerciseSetDTO.getReps());
+            newExerciseSet.setRepetitions(exerciseSetDTO.getReps());
 
             Exercise exercise = exerciseRepository.findById(exerciseSetDTO.getExerciseId())
                     .orElseThrow(() -> new EntityNotFoundException("Exercício ID " + exerciseSetDTO.getExerciseId() + " não encontrado"));
 
 
-            newExerciseSet.setEs_id(exercise.getExercise_id());
+            newExerciseSet.setSetId(exercise.getExerciseId());
 
             trainingSession.addExerciseSet(newExerciseSet);
         }
@@ -83,11 +83,11 @@ public class TrainingSessionService {
     public TrainingSessionDTO convertDTO(TrainingSession trainingSesssaion) {
         TrainingSessionDTO responseDTO = new TrainingSessionDTO();
 
-        responseDTO.setTsId(trainingSesssaion.getTs_id());
+        responseDTO.setTsId(trainingSesssaion.getSessionId());
         responseDTO.setDate(trainingSesssaion.getDate());
         responseDTO.setNotes(trainingSesssaion.getNotes());
-        responseDTO.setUserId(trainingSesssaion.getUser().getUser_id());
-        responseDTO.setTgId(trainingSesssaion.getTrainingGroup().getTg_id());
+        responseDTO.setUserId(trainingSesssaion.getUser().getUserId());
+        responseDTO.setTgId(trainingSesssaion.getTrainingGroup().getTgId());
 
         return responseDTO;
 

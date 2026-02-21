@@ -35,9 +35,9 @@ public class ExerciseService {
 
         exerciseRepository.save(newExercise);
 
-        return new ExerciseDTO(newExercise.getExercise_id(),
+        return new ExerciseDTO(newExercise.getExerciseId(),
                 newExercise.getName(),
-                newExercise.getTrainingGroup().getTg_id());
+                newExercise.getTrainingGroup().getTgId());
     }
 
 }

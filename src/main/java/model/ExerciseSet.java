@@ -7,19 +7,26 @@ import java.math.BigDecimal;
 
 @Data
 @Entity
-@Table(name = "exerciseSet")
+@Table(name = "exercise_sets") // Padronizado com o plural e snake_case
 public class ExerciseSet {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "es_id")
-    private long es_id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "set_id") // Nome sugerido para manter o padrão
+    private Long setId;
 
-    @Column(name = "numberSets")
-    private Integer numberSets;
+    @Column(name = "set_number") // No UML costuma ser o número da série (1, 2, 3...)
+    private Integer setNumber;
 
-    @Column(name = "reps")
-    private Integer reps;
+    private Integer repetitions; // Seguindo o UML
 
-    @Column(name = "weight")
     private BigDecimal weight;
+
+    @ManyToOne
+    @JoinColumn(name = "session_id") // Liga com a TrainingSession
+    private TrainingSession trainingSession;
+
+    @ManyToOne
+    @JoinColumn(name = "exercise_id") // Liga com o Exercise
+    private Exercise exercise;
 }
