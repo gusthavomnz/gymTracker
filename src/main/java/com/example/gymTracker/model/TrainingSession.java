@@ -1,4 +1,4 @@
-package model;
+package com.example.gymTracker.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -28,6 +28,9 @@ public class TrainingSession {
     @Column(name = "session_id")
     private Long sessionId;
 
+    @Column(name = "ts_name")
+    private String name;
+
     @Column(name = "date")
     private LocalDate date;
 
@@ -47,11 +50,8 @@ public class TrainingSession {
 
     // O MÉTODO HELPER:
     public void addExerciseSet(ExerciseSet set) {
-        // 1. Adiciona o set à lista da Sessão
         this.exerciseSets.add(set);
-
-        // 2. Avisa o set que ele PERTENCE a esta Sessão específica (this)
-        set.setSetId(this.getSessionId());
+        set.setTrainingSession(this);
     }
 
 }

@@ -1,5 +1,6 @@
-package dto;
+package com.example.gymTracker.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -8,8 +9,11 @@ import java.math.BigDecimal;
 @Data
 public class ExerciseSetDTO {
 
+    private Long ts_id;
+
     private Long exerciseId;
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Integer setNumber;
 
     private Integer reps;

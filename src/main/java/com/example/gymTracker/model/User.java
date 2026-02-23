@@ -1,10 +1,10 @@
-package model;
+package com.example.gymTracker.model;
 
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.Data;
-import model.Enum.GenderEnum;
+import com.example.gymTracker.model.Enum.GenderEnum;
 import java.math.BigDecimal;
 
 

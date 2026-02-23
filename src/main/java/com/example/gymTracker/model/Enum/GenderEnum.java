@@ -1,4 +1,4 @@
-package model.Enum;
+package com.example.gymTracker.model.Enum;
 
 
 

@@ -1,7 +1,7 @@
-package dto;
+package com.example.gymTracker.dto;
 
 import lombok.Data;
-import model.Enum.GenderEnum;
+import com.example.gymTracker.model.Enum.GenderEnum;
 
 import java.math.BigDecimal;
 

@@ -3,6 +3,7 @@ CREATE TABLE training_sessions (
     user_id BIGINT NOT NULL,
     tg_id BIGINT NOT NULL,
     date DATE NOT NULL,
+    ts_name VARCHAR(50),
     notes VARCHAR(255),
     PRIMARY KEY (session_id),
     CONSTRAINT fk_session_user FOREIGN KEY (user_id) REFERENCES users (user_id),

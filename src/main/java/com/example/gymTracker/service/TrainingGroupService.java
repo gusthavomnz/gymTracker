@@ -1,11 +1,11 @@
-package service;
+package com.example.gymTracker.service;
 
 
-import dto.TrainingGroupDTO;
-import model.TrainingGroup;
+import com.example.gymTracker.dto.TrainingGroupDTO;
+import com.example.gymTracker.model.TrainingGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import repository.TrainingGroupRepository;
+import com.example.gymTracker.repository.TrainingGroupRepository;
 
 @Service
 public class TrainingGroupService {

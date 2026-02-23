@@ -1,4 +1,4 @@
-package model;
+package com.example.gymTracker.model;
 
 
 import jakarta.persistence.*;

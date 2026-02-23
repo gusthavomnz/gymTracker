@@ -1,12 +1,6 @@
-package dto;
+package com.example.gymTracker.dto;
 
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import lombok.Data;
-import model.ExerciseSet;
-import model.TrainingGroup;
-import model.User;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -14,7 +8,10 @@ import java.util.List;
 public class TrainingSessionDTO {
 
 
+    private String name;
+
     private long TsId;
+
     private LocalDate date;
 
     private String notes;

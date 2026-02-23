@@ -1,4 +1,4 @@
-package model;
+package com.example.gymTracker.model;
 
 
 import jakarta.persistence.*;
@@ -12,10 +12,11 @@ public class Exercise {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "exercise_id")
-    private long exerciseId;
+    private Long exerciseId;
 
     @Column(name = "name")
     private String name;
+
 
     @ManyToOne
     @JoinColumn(name = "training_group_id")

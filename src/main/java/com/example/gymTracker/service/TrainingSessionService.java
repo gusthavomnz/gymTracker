@@ -1,22 +1,17 @@
-package service;
+package com.example.gymTracker.service;
 
 
-import dto.ExerciseDTO;
-import dto.ExerciseSetDTO;
-import dto.TrainingSessionDTO;
-import dto.UserRegisterDTO;
+import com.example.gymTracker.dto.ExerciseSetDTO;
+import com.example.gymTracker.dto.TrainingSessionDTO;
+import com.example.gymTracker.model.*;
 import jakarta.persistence.EntityNotFoundException;
-import model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import repository.ExerciseRepository;
-import repository.TrainingGroupRepository;
-import repository.TrainingSessionRepository;
-import repository.UserRepository;
-
-import java.time.LocalDate;
-import java.util.List;
+import com.example.gymTracker.repository.ExerciseRepository;
+import com.example.gymTracker.repository.TrainingGroupRepository;
+import com.example.gymTracker.repository.TrainingSessionRepository;
+import com.example.gymTracker.repository.UserRepository;
 
 @Service
 public class TrainingSessionService {
@@ -31,13 +26,6 @@ public class TrainingSessionService {
 
 
  TrainingSessionRepository trainingSessionRepository;
-/*
-    private LocalDate date;
-    private String notes;
-    private long userId;
-    private long tgId;
-    private List<ExerciseSetDTO> exerciseSets;
-*/
 
 
     @Transactional
