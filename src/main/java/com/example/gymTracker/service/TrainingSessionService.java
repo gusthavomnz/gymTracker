@@ -13,6 +13,9 @@ import com.example.gymTracker.repository.TrainingGroupRepository;
 import com.example.gymTracker.repository.TrainingSessionRepository;
 import com.example.gymTracker.repository.UserRepository;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class TrainingSessionService {
 
@@ -22,9 +25,10 @@ public class TrainingSessionService {
  @Autowired
  TrainingGroupRepository trainingGroupRepository;
 
+    @Autowired
  UserRepository userRepository;
 
-
+@Autowired
  TrainingSessionRepository trainingSessionRepository;
 
 
@@ -37,29 +41,13 @@ public class TrainingSessionService {
 
         // Inicia o processo de Instanciamento da entidade:
         TrainingSession trainingSession = new TrainingSession();
+        trainingSession.setName(trainingSessionDTO.getName());
         trainingSession.setUser(user);
         trainingSession.setTrainingGroup(trainingGroup);
         trainingSession.setDate(trainingSessionDTO.getDate());
         trainingSession.setNotes(trainingSessionDTO.getNotes());
 
-        // Vincula cada série a um exercicio do catalogo(Many-to-one):
-        for (ExerciseSetDTO exerciseSetDTO: trainingSessionDTO.getExerciseSets()) {
-            ExerciseSet newExerciseSet = new ExerciseSet();
-            newExerciseSet.setSetNumber(exerciseSetDTO.getSetNumber());
-            newExerciseSet.setWeight(exerciseSetDTO.getWeight());
-            newExerciseSet.setRepetitions(exerciseSetDTO.getReps());
-
-            Exercise exercise = exerciseRepository.findById(exerciseSetDTO.getExerciseId())
-                    .orElseThrow(() -> new EntityNotFoundException("Exercício ID " + exerciseSetDTO.getExerciseId() + " não encontrado"));
-
-
-            newExerciseSet.setSetId(exercise.getExerciseId());
-
-            trainingSession.addExerciseSet(newExerciseSet);
-        }
-
         TrainingSession savedSession = trainingSessionRepository.save(trainingSession);
-
 
         // Converte para DTO para resposta
         TrainingSessionDTO responseDTO = convertDTO(savedSession);
@@ -67,7 +55,7 @@ public class TrainingSessionService {
         return responseDTO;
     }
 
-
+    @Transactional
     public TrainingSessionDTO convertDTO(TrainingSession trainingSesssaion) {
         TrainingSessionDTO responseDTO = new TrainingSessionDTO();
 
@@ -76,8 +64,34 @@ public class TrainingSessionService {
         responseDTO.setNotes(trainingSesssaion.getNotes());
         responseDTO.setUserId(trainingSesssaion.getUser().getUserId());
         responseDTO.setTgId(trainingSesssaion.getTrainingGroup().getTgId());
+        responseDTO.setName(trainingSesssaion.getName());
 
         return responseDTO;
+
+    }
+
+    @Transactional
+    public TrainingSessionDTO getReportSession(Long sessionId){
+        TrainingSession currentSession = trainingSessionRepository.findById(sessionId).orElseThrow();
+        TrainingSessionDTO dto = convertDTO(currentSession); // falta adicionar os sets
+        List<ExerciseSetDTO> listSet = new ArrayList<>();
+
+        if (currentSession.getExerciseSets() != null) {
+            for (ExerciseSet set : currentSession.getExerciseSets()) {
+                ExerciseSetDTO sDto = new ExerciseSetDTO();
+
+                sDto.setExerciseId(set.getExercise().getExerciseId());
+                sDto.setWeight(set.getWeight());
+                sDto.setReps(set.getRepetitions());
+                sDto.setSetNumber(set.getSetNumber());
+                sDto.setTs_id(currentSession.getSessionId());
+
+                listSet.add(sDto);
+            }
+        }
+        dto.setExerciseSets(listSet);
+        return dto;
+
 
     }
 }
