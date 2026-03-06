@@ -34,25 +34,24 @@ public class TrainingSessionService {
 
     @Transactional
     public TrainingSessionDTO createTrainingSession(TrainingSessionDTO trainingSessionDTO){
-        // Busca de usuario/Grupo Muscular para garantir integridade referencial:
-        User user = userRepository.findById(trainingSessionDTO.getUserId()).orElseThrow();
-        TrainingGroup trainingGroup = trainingGroupRepository.findById(trainingSessionDTO.getTgId()).orElseThrow();
+        // Busca User pelo TOKEN
+        User user = (User) org.springframework.security.core.context.SecurityContextHolder
+                .getContext().getAuthentication().getPrincipal();
 
+        TrainingGroup trainingGroup = trainingGroupRepository.findById(trainingSessionDTO.getTgId())
+                .orElseThrow(() -> new EntityNotFoundException("Training Group not found"));
 
         // Inicia o processo de Instanciamento da entidade:
         TrainingSession trainingSession = new TrainingSession();
         trainingSession.setName(trainingSessionDTO.getName());
-        trainingSession.setUser(user);
+        trainingSession.setUser(user); // <-- User que veio do Token
         trainingSession.setTrainingGroup(trainingGroup);
         trainingSession.setDate(trainingSessionDTO.getDate());
         trainingSession.setNotes(trainingSessionDTO.getNotes());
 
         TrainingSession savedSession = trainingSessionRepository.save(trainingSession);
 
-        // Converte para DTO para resposta
-        TrainingSessionDTO responseDTO = convertDTO(savedSession);
-
-        return responseDTO;
+        return convertDTO(savedSession);
     }
 
     @Transactional
