@@ -8,10 +8,10 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.example.gymTracker.repository.ExerciseRepository;
-import com.example.gymTracker.repository.TrainingGroupRepository;
-import com.example.gymTracker.repository.TrainingSessionRepository;
-import com.example.gymTracker.repository.UserRepository;
+import com.example.gymTracker.config.AuthService;
+import com.example.gymTracker.repository.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,24 +19,19 @@ import java.util.List;
 @Service
 public class TrainingSessionService {
 
- @Autowired
-    ExerciseRepository exerciseRepository;
-
- @Autowired
- TrainingGroupRepository trainingGroupRepository;
+    @Autowired
+    TrainingSessionRepository trainingSessionRepository;
 
     @Autowired
- UserRepository userRepository;
+    private AuthService authService;
 
-@Autowired
- TrainingSessionRepository trainingSessionRepository;
+    @Autowired
+    private TrainingGroupRepository trainingGroupRepository;
 
 
     @Transactional
     public TrainingSessionDTO createTrainingSession(TrainingSessionDTO trainingSessionDTO){
-        // Busca User pelo TOKEN
-        User user = (User) org.springframework.security.core.context.SecurityContextHolder
-                .getContext().getAuthentication().getPrincipal();
+        User user = authService.getAuthenticatedUser();
 
         TrainingGroup trainingGroup = trainingGroupRepository.findById(trainingSessionDTO.getTgId())
                 .orElseThrow(() -> new EntityNotFoundException("Training Group not found"));
@@ -90,7 +85,13 @@ public class TrainingSessionService {
         }
         dto.setExerciseSets(listSet);
         return dto;
+    }
 
 
+    @Transactional
+    public Page<TrainingSessionDTO> getHistory(Pageable pageable) {
+        User user = authService.getAuthenticatedUser();
+        Page<TrainingSession> sessions = trainingSessionRepository.findByUserOrderByDateDesc(user, pageable);
+        return sessions.map(this::convertDTO);
     }
 }

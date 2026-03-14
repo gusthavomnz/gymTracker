@@ -11,4 +11,8 @@ public interface ExerciseRepository extends JpaRepository<Exercise, Long>{
 
 
     List<Exercise> findByTrainingGroup_TgId(Long tgId);
+
+    List<Exercise> findByNameContainingIgnoreCase(String name);
+
+    List<Exercise> findByTrainingGroup_NameContainingIgnoreCase(String muscleGroup);
 }

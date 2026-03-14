@@ -39,6 +39,24 @@ ExerciseService exerciseService;
      return ResponseEntity.status(HttpStatus.CREATED).body(newExercise);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<ExerciseDTO> updateExercise(@PathVariable Long id, @RequestBody ExerciseDTO exerciseDTO) {
+        return ResponseEntity.ok(exerciseService.updateExercise(id, exerciseDTO));
+    }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteExercise(@PathVariable Long id) {
+        exerciseService.deleteExercise(id);
+        return ResponseEntity.noContent().build();
+    }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<ExerciseDTO>> searchByName(@RequestParam String q) {
+        return ResponseEntity.ok(exerciseService.findByName(q));
+    }
+
+    @GetMapping("/muscle-group/name/{name}")
+    public ResponseEntity<List<ExerciseDTO>> searchByMuscleGroup(@PathVariable String name) {
+        return ResponseEntity.ok(exerciseService.findByMuscleGroupName(name));
+    }
 }

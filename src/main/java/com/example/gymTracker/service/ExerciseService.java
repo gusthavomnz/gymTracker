@@ -58,12 +58,49 @@ public class ExerciseService {
     public List<ExerciseDTO> findByTrainingGroup(long search){
         List<Exercise> exercises = exerciseRepository.findByTrainingGroup_TgId(search);
         return exercises.stream()
-                .map(e -> new ExerciseDTO(
-                        e.getExerciseId(),
-                        e.getName(),
-                        e.getTrainingGroup().getTgId()))
+                .map(this::mapToDTO)
                 .toList();
     }
 
+    public List<ExerciseDTO> findByName(String name) {
+        return exerciseRepository.findByNameContainingIgnoreCase(name).stream()
+                .map(this::mapToDTO)
+                .toList();
+    }
 
+    public List<ExerciseDTO> findByMuscleGroupName(String muscleGroup) {
+        return exerciseRepository.findByTrainingGroup_NameContainingIgnoreCase(muscleGroup).stream()
+                .map(this::mapToDTO)
+                .toList();
+    }
+
+    @Transactional
+    public ExerciseDTO updateExercise(Long id, ExerciseDTO exerciseDTO) {
+        Exercise exercise = exerciseRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Exercise not found"));
+        
+        TrainingGroup trainingGroup = trainingGroupRepository.findById(exerciseDTO.getTrainingGroupId())
+                .orElseThrow(() -> new EntityNotFoundException("Training Group not found"));
+
+        exercise.setName(exerciseDTO.getName());
+        exercise.setTrainingGroup(trainingGroup);
+        
+        Exercise updatedExercise = exerciseRepository.save(exercise);
+        return mapToDTO(updatedExercise);
+    }
+
+    @Transactional
+    public void deleteExercise(Long id) {
+        if (!exerciseRepository.existsById(id)) {
+            throw new EntityNotFoundException("Exercise not found");
+        }
+        exerciseRepository.deleteById(id);
+    }
+
+    private ExerciseDTO mapToDTO(Exercise e) {
+        return new ExerciseDTO(
+                e.getExerciseId(),
+                e.getName(),
+                e.getTrainingGroup().getTgId());
+    }
 }
