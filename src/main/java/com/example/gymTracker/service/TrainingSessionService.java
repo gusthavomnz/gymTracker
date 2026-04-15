@@ -50,24 +50,26 @@ public class TrainingSessionService {
     }
 
     @Transactional
-    public TrainingSessionDTO convertDTO(TrainingSession trainingSesssaion) {
+    public TrainingSessionDTO convertDTO(TrainingSession trainingSession) {
         TrainingSessionDTO responseDTO = new TrainingSessionDTO();
 
-        responseDTO.setTsId(trainingSesssaion.getSessionId());
-        responseDTO.setDate(trainingSesssaion.getDate());
-        responseDTO.setNotes(trainingSesssaion.getNotes());
-        responseDTO.setUserId(trainingSesssaion.getUser().getUserId());
-        responseDTO.setTgId(trainingSesssaion.getTrainingGroup().getTgId());
-        responseDTO.setName(trainingSesssaion.getName());
+        responseDTO.setTsId(trainingSession.getSessionId());
+        responseDTO.setDate(trainingSession.getDate());
+        responseDTO.setNotes(trainingSession.getNotes());
+        responseDTO.setUserId(trainingSession.getUser().getUserId());
+        responseDTO.setTgId(trainingSession.getTrainingGroup().getTgId());
+        responseDTO.setName(trainingSession.getName());
 
         return responseDTO;
 
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public TrainingSessionDTO getReportSession(Long sessionId){
+
         TrainingSession currentSession = trainingSessionRepository.findById(sessionId).orElseThrow();
-        TrainingSessionDTO dto = convertDTO(currentSession); // falta adicionar os sets
+
+        TrainingSessionDTO dto = convertDTO(currentSession);
         List<ExerciseSetDTO> listSet = new ArrayList<>();
 
         if (currentSession.getExerciseSets() != null) {
