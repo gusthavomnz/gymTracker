@@ -1,164 +1,336 @@
-🏋️ GymTracker API
-O GymTracker é uma API REST desenvolvida para transformar registros brutos
-de treino em inteligência de performance. Mais do que um diário digital,
-a plataforma atua como uma ferramenta analítica para praticantes de musculação
-que buscam precisão no acompanhamento de sua evolução.
+# GymTracker API
 
-🎯 Por que o GymTracker?
-A estagnação (platô) nos treinos ocorre por falta de dados claros.
-Esta API resolve esse problema ao estruturar cada série e repetição, permitindo:
+API REST para registro e análise de treinos de musculação. Transforma séries e repetições em dados de performance: volume de carga, recordes pessoais, estimativa de 1RM e distribuição de volume por grupo muscular.
 
-📈 Identificação de Platôs: Analise estatísticas para entender
-onde e por que sua evolução estagnou.
+## Stack
 
-⚖️ Sobrecarga Progressiva: Monitore o aumento de carga e volume
-total para garantir estímulos constantes.
+| Tecnologia | Versão |
+|---|---|
+| Spring Boot | 4.0.2 |
+| Java | 21 |
+| MySQL | 8+ |
+| Flyway | (migrations automáticas) |
+| Spring Security + JWT | Auth0 java-jwt 4.4.0 |
+| Lombok | - |
+| Maven | - |
 
-🔍 Visão Analítica: Converta logs de peso e repetições em
-indicadores de desempenho estratégicos.
+## Pré-requisitos
 
-🔐 Cheat Sheet -> Controller AUTH
-📝 POST: auth/register
-Request Body:
+- Java 21+
+- MySQL rodando em `localhost:3306` com banco `gymTracker` criado
+- Variável de ambiente `DB_PASSWORD` configurada
+
+## Executando
+
+```bash
+mvn spring-boot:run
+```
+
+As migrations Flyway rodam automaticamente ao iniciar.
+
+---
+
+## Endpoints
+
+### Auth — `/auth`
+
+Rotas públicas, sem autenticação.
+
+#### `POST /auth/register`
+
 ```json
+// Request
 {
-"name": "Seu Nome",
-"email": "seu_nome@email.com",
-"password": "sua_senha",
-"bodyWeight": 60,
-"gender": "M"
+  "name": "Seu Nome",
+  "email": "email@exemplo.com",
+  "password": "sua_senha",
+  "bodyWeight": 75,
+  "gender": "M"
+}
+
+// Response 201
+{
+  "id": 1,
+  "name": "Seu Nome",
+  "email": "email@exemplo.com"
 }
 ```
 
-Response (201 Created):
+#### `POST /auth/login`
+
 ```json
+// Request
 {
-"id": 4,
-"name": "Seu Nome",
-"email": "seu_nome@email.com"
+  "email": "email@exemplo.com",
+  "password": "sua_senha"
+}
+
+// Response 200
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
 ```
 
-🔑 POST: auth/login
-Request Body:
-```json
-{
-"email": "seu_nome@email.com",
-"password": "sua_senha"
-}
-```
+---
 
-Response (200 OK):
-```json
-{
-"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-}
-```
+> Todas as rotas abaixo requerem o header:
+> `Authorization: Bearer <token>`
 
-🏋️ Cheat Sheet -> Controller EXERCISE
-🔐 Requer Header: Authorization: Bearer <token>
+---
 
-📋 GET: exercise/list
-Response (200 OK):
+### Exercícios — `/exercise`
+
+#### `GET /exercise/list`
+Retorna todos os exercícios cadastrados.
+
 ```json
+// Response 200
 [
-{ "id": 1, "name": "Supino Reto com Barra", "trainingGroupId": 1 },
-{ "id": 17, "name": "Puxada Pulley Frente", "trainingGroupId": 2 },
-{ "id": 33, "name": "Desenvolvimento Halteres", "trainingGroupId": 3 },
-"..."
+  { "id": 1, "name": "Supino Reto com Barra", "trainingGroupId": 1 },
+  { "id": 17, "name": "Puxada Pulley Frente", "trainingGroupId": 2 }
 ]
 ```
 
-🔍 GET: exercise/group/{id}
-Response (200 OK):
+#### `GET /exercise/group/{id}`
+Exercícios filtrados por grupo muscular (ID).
+
 ```json
+// Response 200
 [
-{ "id": 1, "name": "Supino Reto com Barra", "trainingGroupId": 1 },
-{ "id": 2, "name": "Supino Reto com Halteres", "trainingGroupId": 1 },
-"..."
+  { "id": 1, "name": "Supino Reto com Barra", "trainingGroupId": 1 },
+  { "id": 2, "name": "Supino Reto com Halteres", "trainingGroupId": 1 }
 ]
 ```
 
-➕ POST: exercise
-Request Body:
+#### `GET /exercise/search?q={termo}`
+Busca exercícios por nome.
+
+```
+GET /exercise/search?q=supino
+```
+
+#### `GET /exercise/muscle-group/name/{name}`
+Exercícios filtrados pelo nome do grupo muscular.
+
+```
+GET /exercise/muscle-group/name/peito
+```
+
+#### `POST /exercise`
+Cria um exercício personalizado.
+
 ```json
+// Request
 {
-"name": "Exercicio Teste",
-"trainingGroupId": 2
+  "name": "Exercício Customizado",
+  "trainingGroupId": 2
+}
+
+// Response 201
+{
+  "id": 118,
+  "name": "Exercício Customizado",
+  "trainingGroupId": 2
 }
 ```
 
-Response (201 Created):
+#### `PUT /exercise/{id}`
+Atualiza um exercício existente.
+
 ```json
+// Request
 {
-"id": 118,
-"name": "Exercicio Teste",
-"trainingGroupId": 2
+  "name": "Novo Nome",
+  "trainingGroupId": 2
+}
+
+// Response 200
+{
+  "id": 118,
+  "name": "Novo Nome",
+  "trainingGroupId": 2
 }
 ```
 
-📊 Cheat Sheet -> Training Session & Sets
-🔐 Requer Header: Authorization: Bearer <token>
+#### `DELETE /exercise/{id}`
+Remove um exercício. Response `204 No Content`.
 
-📅 POST: ts/createTS
-Request Body:
+---
+
+### Sessões de Treino — `/ts`
+
+#### `POST /ts/createTS`
+Cria uma nova sessão de treino.
+
 ```json
+// Request
 {
-"name": "Treino de Costas",
-"tgId": 2,
-"date": "2026-03-06",
-"notes": "Foco em força!"
+  "name": "Treino de Costas",
+  "tgId": 2,
+  "date": "2026-04-20",
+  "notes": "Foco em força!"
+}
+
+// Response 200
+{
+  "TsId": 4,
+  "name": "Treino de Costas",
+  "date": "2026-04-20",
+  "tgId": 2,
+  "userId": 1,
+  "exerciseSets": null,
+  "notes": "Foco em força!"
 }
 ```
 
-Response (200 OK):
+#### `GET /ts/{id}`
+Retorna detalhes e todas as séries de uma sessão.
+
 ```json
+// Response 200
 {
-"TsId": 4,
-"date": "2026-03-06",
-"exerciseSets": null,
-"name": "Treino de Costas",
-"notes": "Foco em força!",
-"tgId": 2,
-"userId": 4
+  "tsId": 4,
+  "name": "Treino de Costas",
+  "date": "2026-04-20",
+  "tgId": 2,
+  "notes": "Foco em força!",
+  "exerciseSets": [
+    { "exerciseId": 17, "setNumber": 1, "reps": 8, "weight": 100.0 },
+    { "exerciseId": 17, "setNumber": 2, "reps": 6, "weight": 110.0 }
+  ]
 }
 ```
 
-📈 POST: api/sets
-Request Body:
+#### `GET /ts/history?page=0&size=10`
+Histórico paginado de sessões do usuário autenticado.
+
 ```json
+// Response 200
 {
-"ts_id": 4,
-"exerciseId" : 17,
-"weight" : 100,
-"reps" : 8
+  "content": [ { "tsId": 4, "name": "Treino de Costas", "date": "2026-04-20", "..." } ],
+  "totalElements": 20,
+  "totalPages": 2,
+  "number": 0
 }
 ```
 
-Response (200 OK):
+---
+
+### Séries — `/api/sets`
+
+#### `POST /api/sets`
+Adiciona uma série a uma sessão existente.
+
 ```json
+// Request
 {
-"exerciseId": 17,
-"reps": 8,
-"ts_id": 4,
-"weight": 100
+  "ts_id": 4,
+  "exerciseId": 17,
+  "weight": 100,
+  "reps": 8
+}
+
+// Response 200
+{
+  "exerciseId": 17,
+  "reps": 8,
+  "ts_id": 4,
+  "weight": 100
 }
 ```
 
-📑 GET: ts/{id}
-Response (200 OK):
+---
+
+### Performance — `/performance`
+
+#### `GET /performance/volume-load/{sessionId}`
+Calcula o volume de carga total de uma sessão (peso × reps), detalhado por exercício.
+
 ```json
+// Response 200
 {
-"tsId": 4,
-"name": "Treino de Costas",
-"date": "2026-03-06",
-"tgId": 2,
-"exerciseSets": [
-{ "exerciseId": 17, "setNumber": 1, "reps": 8, "weight": 100.0 },
-{ "exerciseId": 17, "setNumber": 2, "reps": 4, "weight": 160.0 },
-{ "exerciseId": 18, "setNumber": 1, "reps": 10, "weight": 140.0 },
-"..."
-],
-"notes": "Foco em força!"
+  "sessionId": 4,
+  "sessionName": "Treino de Costas",
+  "totalVolume": 2400.0,
+  "volumeByExercise": {
+    "Puxada Pulley Frente": 1600.0,
+    "Remada Curvada": 800.0
+  }
 }
 ```
+
+#### `GET /performance/prs`
+Lista os recordes pessoais (maior peso por exercício) do usuário autenticado.
+
+```json
+// Response 200
+[
+  {
+    "exerciseName": "Supino Reto com Barra",
+    "weight": 120.0,
+    "repetitions": 5,
+    "date": "2026-04-10",
+    "estimatedOneRepMax": 135.0
+  }
+]
+```
+
+#### `GET /performance/volume-distribution?days=7`
+Distribuição do volume de treino por grupo muscular nos últimos N dias (padrão: 7).
+
+```json
+// Response 200
+{
+  "Peito": 3200,
+  "Costas": 4800,
+  "Ombros": 1600
+}
+```
+
+#### `GET /performance/1rm-calc?weight={peso}&reps={reps}`
+Estima o 1RM com base em peso e repetições (fórmula de Epley).
+
+```
+GET /performance/1rm-calc?weight=100&reps=8
+```
+
+```json
+// Response 200
+133.33
+```
+
+---
+
+### Templates de Treino — `/template`
+
+#### `POST /template`
+Cria um template de treino com lista de exercícios.
+
+```json
+// Request
+{
+  "name": "Push Day",
+  "exerciseIds": [1, 3, 5, 34]
+}
+
+// Response 201
+{
+  "templateId": 1,
+  "name": "Push Day",
+  "exerciseIds": [1, 3, 5, 34]
+}
+```
+
+#### `GET /template/my`
+Lista os templates do usuário autenticado.
+
+```json
+// Response 200
+[
+  { "templateId": 1, "name": "Push Day", "exerciseIds": [1, 3, 5, 34] },
+  { "templateId": 2, "name": "Pull Day", "exerciseIds": [17, 18, 19] }
+]
+```
+
+#### `DELETE /template/{id}`
+Remove um template. Response `204 No Content`.
