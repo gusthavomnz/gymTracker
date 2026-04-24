@@ -12,7 +12,7 @@ import com.example.gymTracker.service.ExerciseService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/exercise")
+@RequestMapping("/exercises")
 public class ExerciseController {
 
 
@@ -21,7 +21,7 @@ ExerciseService exerciseService;
 
 
 @Transactional
-@GetMapping("/list")
+@GetMapping
     public ResponseEntity<List<ExerciseDTO>> listAll(){
         return ResponseEntity.ok(exerciseService.findAll());
     }

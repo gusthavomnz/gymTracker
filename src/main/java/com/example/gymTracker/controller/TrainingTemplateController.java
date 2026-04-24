@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/template")
+@RequestMapping("/templates")
 public class TrainingTemplateController {
 
     @Autowired
