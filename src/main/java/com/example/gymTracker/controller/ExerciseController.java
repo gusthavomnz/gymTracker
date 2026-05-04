@@ -2,6 +2,7 @@ package com.example.gymTracker.controller;
 
 
 import com.example.gymTracker.dto.ExerciseDTO;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,13 +35,13 @@ ExerciseService exerciseService;
 
 
     @PostMapping
-    public ResponseEntity<ExerciseDTO> createExercise(@RequestBody ExerciseDTO exerciseDTO){
+    public ResponseEntity<ExerciseDTO> createExercise(@RequestBody @Valid ExerciseDTO exerciseDTO){
      ExerciseDTO newExercise = exerciseService.createExercise(exerciseDTO);
      return ResponseEntity.status(HttpStatus.CREATED).body(newExercise);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ExerciseDTO> updateExercise(@PathVariable Long id, @RequestBody ExerciseDTO exerciseDTO) {
+    public ResponseEntity<ExerciseDTO> updateExercise(@PathVariable Long id, @RequestBody @Valid ExerciseDTO exerciseDTO) {
         return ResponseEntity.ok(exerciseService.updateExercise(id, exerciseDTO));
     }
 

@@ -3,6 +3,7 @@ package com.example.gymTracker.controller;
 
 import com.example.gymTracker.dto.ExerciseSetDTO;
 import com.example.gymTracker.service.ExerciseSetService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,7 +19,7 @@ public class ExerciseSetController {
     private ExerciseSetService exerciseSetService;
 
     @PostMapping
-    public ResponseEntity<ExerciseSetDTO> createSet(@RequestBody ExerciseSetDTO dto) {
+    public ResponseEntity<ExerciseSetDTO> createSet(@RequestBody @Valid ExerciseSetDTO dto) {
         return exerciseSetService.saveSet(dto);
     }
 }

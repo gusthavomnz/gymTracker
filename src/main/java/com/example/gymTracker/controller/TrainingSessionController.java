@@ -2,6 +2,7 @@ package com.example.gymTracker.controller;
 
 import com.example.gymTracker.dto.TrainingSessionDTO;
 import com.example.gymTracker.service.TrainingSessionService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +20,7 @@ public class TrainingSessionController {
 
 
     @PostMapping
-    public ResponseEntity<TrainingSessionDTO> createTrainingSession(@RequestBody TrainingSessionDTO trainingSessionDTO){
+    public ResponseEntity<TrainingSessionDTO> createTrainingSession(@RequestBody @Valid TrainingSessionDTO trainingSessionDTO){
         TrainingSessionDTO savedSession = trainingSessionService.createTrainingSession(trainingSessionDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedSession);
     }
