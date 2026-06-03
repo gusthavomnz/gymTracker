@@ -1,59 +1,52 @@
 package com.example.gymTracker.service;
 
-
-import com.example.gymTracker.dto.ExerciseSetDTO;
-import com.example.gymTracker.dto.TrainingSessionDTO;
+import com.example.gymTracker.dto.request.ExerciseSetRequestDTO;
+import com.example.gymTracker.dto.response.ExerciseSetResponseDTO;
+import com.example.gymTracker.mapper.ExerciseSetMapper;
 import com.example.gymTracker.model.Exercise;
 import com.example.gymTracker.model.ExerciseSet;
 import com.example.gymTracker.model.TrainingSession;
-import com.example.gymTracker.repository.ExerciseRepository;
 import com.example.gymTracker.repository.ExerciseSetRepository;
-import com.example.gymTracker.repository.TrainingSessionRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class ExerciseSetService {
 
-@Autowired
-    ExerciseSetRepository exerciseSetRepository;
-@Autowired
-    ExerciseRepository exerciseRepository;
-@Autowired
-TrainingSessionRepository trainingSessionRepository;
+    @Autowired
+    private ExerciseSetRepository exerciseSetRepository;
 
+    @Autowired
+    private ExerciseService exerciseService;
 
+    @Autowired
+    private TrainingSessionService trainingSessionService;
 
+    @Autowired
+    private ExerciseSetMapper exerciseSetMapper;
 
-@Transactional
-public ResponseEntity saveSet(ExerciseSetDTO exerciseSetDTO) {
-    // BUSCA A SESSÃO DE TREINO ATUAL:
-    TrainingSession currentSession = trainingSessionRepository.findById(exerciseSetDTO.getTs_id()).orElseThrow();
-    Exercise currentExercise = exerciseRepository.findById(exerciseSetDTO.getExerciseId()).orElseThrow();
+    @Transactional
+    public ExerciseSetResponseDTO saveSet(ExerciseSetRequestDTO dto) {
+        TrainingSession session = trainingSessionService.findEntityById(dto.tsId());
+        Exercise exercise = exerciseService.findEntityById(dto.exerciseId());
 
-    // HORA DE IMPLEMENTAR A LOGICA PARA SABER SE JA EXISTE ALGUMA SERIE DESSE EXERCICIO:
-    long countSet = exerciseSetRepository.countByTrainingSessionSessionIdAndExerciseExerciseId(currentSession.getSessionId(), currentExercise.getExerciseId());
+        long countSet = exerciseSetRepository.countByTrainingSessionSessionIdAndExerciseExerciseId(
+                session.getSessionId(), exercise.getExerciseId());
 
-    ExerciseSet newSet = new ExerciseSet();
-    newSet.setTrainingSession(currentSession);
-    newSet.setExercise(currentExercise);
-    newSet.setWeight(exerciseSetDTO.getWeight());
-    newSet.setRepetitions(exerciseSetDTO.getReps());
-    newSet.setSetNumber((int)countSet + 1);
+        ExerciseSet entity = exerciseSetMapper.toEntity(dto, session, exercise, (int) countSet + 1);
+        ExerciseSet saved = exerciseSetRepository.save(entity);
+        return exerciseSetMapper.toDTO(saved);
+    }
 
-    ExerciseSet savedSet = exerciseSetRepository.save(newSet);
+    public List<ExerciseSet> findByUserWithDetails(Long userId) {
+        return exerciseSetRepository.findByUserWithDetails(userId);
+    }
 
-    ExerciseSetDTO response = new ExerciseSetDTO();
-    response.setExerciseId(savedSet.getExercise().getExerciseId());
-    response.setSetNumber(savedSet.getSetNumber());
-    response.setWeight(savedSet.getWeight());
-    response.setReps(savedSet.getRepetitions());
-    response.setTs_id(savedSet.getTrainingSession().getSessionId());
-    return ResponseEntity.ok(response);
-
-}
-
+    public List<ExerciseSet> findByUserAndDateAfterWithDetails(Long userId, LocalDate startDate) {
+        return exerciseSetRepository.findByUserAndDateAfterWithDetails(userId, startDate);
+    }
 }

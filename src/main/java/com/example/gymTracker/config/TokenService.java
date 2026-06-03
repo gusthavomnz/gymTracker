@@ -1,20 +1,25 @@
 package com.example.gymTracker.config;
 
-import com.auth0.jwt.JWT; // O IMPORT CORRETO É ESTE
+import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTCreationException;
 import com.example.gymTracker.model.User;
-import org.springframework.stereotype.Service; // Use @Service em vez de @Component para semântica
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-
 
 @Service
 public class TokenService {
 
-    private String secret = "${TOKEN_KEY}";
-    Algorithm algorithm = Algorithm.HMAC256(secret);
+    @Value("${TOKEN_KEY}")
+    private String secret;
+
+    private Algorithm algorithm;
+
+    @PostConstruct
+    public void init() {
+        algorithm = Algorithm.HMAC256(secret);
+    }
 
     public String generateToken(User user){
         return JWT.create()

@@ -1,6 +1,7 @@
 package com.example.gymTracker.controller;
 
-import com.example.gymTracker.dto.TrainingTemplateDTO;
+import com.example.gymTracker.dto.request.TrainingTemplateRequestDTO;
+import com.example.gymTracker.dto.response.TrainingTemplateResponseDTO;
 import com.example.gymTracker.service.TrainingTemplateService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +19,12 @@ public class TrainingTemplateController {
     private TrainingTemplateService trainingTemplateService;
 
     @PostMapping
-    public ResponseEntity<TrainingTemplateDTO> create(@RequestBody @Valid TrainingTemplateDTO dto) {
+    public ResponseEntity<TrainingTemplateResponseDTO> create(@RequestBody @Valid TrainingTemplateRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(trainingTemplateService.createTemplate(dto));
     }
 
     @GetMapping("/my")
-    public ResponseEntity<List<TrainingTemplateDTO>> listMy() {
+    public ResponseEntity<List<TrainingTemplateResponseDTO>> listMy() {
         return ResponseEntity.ok(trainingTemplateService.listMyTemplates());
     }
 

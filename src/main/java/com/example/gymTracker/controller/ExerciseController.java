@@ -1,14 +1,13 @@
 package com.example.gymTracker.controller;
 
-
-import com.example.gymTracker.dto.ExerciseDTO;
+import com.example.gymTracker.dto.request.ExerciseRequestDTO;
+import com.example.gymTracker.dto.response.ExerciseResponseDTO;
+import com.example.gymTracker.service.ExerciseService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import com.example.gymTracker.service.ExerciseService;
 
 import java.util.List;
 
@@ -16,33 +15,27 @@ import java.util.List;
 @RequestMapping("/exercises")
 public class ExerciseController {
 
-
     @Autowired
-ExerciseService exerciseService;
+    private ExerciseService exerciseService;
 
-
-@Transactional
-@GetMapping
-    public ResponseEntity<List<ExerciseDTO>> listAll(){
+    @GetMapping
+    public ResponseEntity<List<ExerciseResponseDTO>> listAll() {
         return ResponseEntity.ok(exerciseService.findAll());
     }
 
-
     @GetMapping("/group/{id}")
-    public ResponseEntity<List<ExerciseDTO>> listByGroupId(@PathVariable Long id) {
+    public ResponseEntity<List<ExerciseResponseDTO>> listByGroupId(@PathVariable Long id) {
         return ResponseEntity.ok(exerciseService.findByTrainingGroup(id));
     }
 
-
     @PostMapping
-    public ResponseEntity<ExerciseDTO> createExercise(@RequestBody @Valid ExerciseDTO exerciseDTO){
-     ExerciseDTO newExercise = exerciseService.createExercise(exerciseDTO);
-     return ResponseEntity.status(HttpStatus.CREATED).body(newExercise);
+    public ResponseEntity<ExerciseResponseDTO> createExercise(@RequestBody @Valid ExerciseRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(exerciseService.createExercise(dto));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ExerciseDTO> updateExercise(@PathVariable Long id, @RequestBody @Valid ExerciseDTO exerciseDTO) {
-        return ResponseEntity.ok(exerciseService.updateExercise(id, exerciseDTO));
+    public ResponseEntity<ExerciseResponseDTO> updateExercise(@PathVariable Long id, @RequestBody @Valid ExerciseRequestDTO dto) {
+        return ResponseEntity.ok(exerciseService.updateExercise(id, dto));
     }
 
     @DeleteMapping("/{id}")
@@ -52,12 +45,12 @@ ExerciseService exerciseService;
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<ExerciseDTO>> searchByName(@RequestParam String q) {
+    public ResponseEntity<List<ExerciseResponseDTO>> searchByName(@RequestParam String q) {
         return ResponseEntity.ok(exerciseService.findByName(q));
     }
 
     @GetMapping("/muscle-group/name/{name}")
-    public ResponseEntity<List<ExerciseDTO>> searchByMuscleGroup(@PathVariable String name) {
+    public ResponseEntity<List<ExerciseResponseDTO>> searchByMuscleGroup(@PathVariable String name) {
         return ResponseEntity.ok(exerciseService.findByMuscleGroupName(name));
     }
 }
