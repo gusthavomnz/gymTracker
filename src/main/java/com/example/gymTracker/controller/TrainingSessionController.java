@@ -1,6 +1,7 @@
 package com.example.gymTracker.controller;
 
-import com.example.gymTracker.dto.TrainingSessionDTO;
+import com.example.gymTracker.dto.request.TrainingSessionRequestDTO;
+import com.example.gymTracker.dto.response.TrainingSessionResponseDTO;
 import com.example.gymTracker.service.TrainingSessionService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,23 +17,20 @@ import org.springframework.web.bind.annotation.*;
 public class TrainingSessionController {
 
     @Autowired
-    TrainingSessionService trainingSessionService;
-
+    private TrainingSessionService trainingSessionService;
 
     @PostMapping
-    public ResponseEntity<TrainingSessionDTO> createTrainingSession(@RequestBody @Valid TrainingSessionDTO trainingSessionDTO){
-        TrainingSessionDTO savedSession = trainingSessionService.createTrainingSession(trainingSessionDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedSession);
+    public ResponseEntity<TrainingSessionResponseDTO> createTrainingSession(@RequestBody @Valid TrainingSessionRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(trainingSessionService.createTrainingSession(dto));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TrainingSessionDTO> getReport(@PathVariable Long id) {
-        TrainingSessionDTO report = trainingSessionService.getReportSession(id);
-        return ResponseEntity.ok(report);
+    public ResponseEntity<TrainingSessionResponseDTO> getReport(@PathVariable Long id) {
+        return ResponseEntity.ok(trainingSessionService.getReportSession(id));
     }
 
     @GetMapping("/history")
-    public ResponseEntity<Page<TrainingSessionDTO>> getHistory(@PageableDefault(size = 10) Pageable pageable) {
+    public ResponseEntity<Page<TrainingSessionResponseDTO>> getHistory(@PageableDefault(size = 10) Pageable pageable) {
         return ResponseEntity.ok(trainingSessionService.getHistory(pageable));
     }
 }

@@ -1,92 +1,73 @@
 package com.example.gymTracker.service;
 
-import com.example.gymTracker.dto.ExerciseDTO;
-import com.example.gymTracker.model.ExerciseSet;
-import jakarta.persistence.EntityNotFoundException;
+import com.example.gymTracker.dto.request.ExerciseRequestDTO;
+import com.example.gymTracker.dto.response.ExerciseResponseDTO;
+import com.example.gymTracker.mapper.ExerciseMapper;
 import com.example.gymTracker.model.Exercise;
 import com.example.gymTracker.model.TrainingGroup;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.gymTracker.repository.ExerciseRepository;
-import com.example.gymTracker.repository.TrainingGroupRepository;
 
 import java.util.List;
-
 
 @Service
 public class ExerciseService {
 
     @Autowired
-    ExerciseRepository exerciseRepository;
+    private ExerciseRepository exerciseRepository;
 
     @Autowired
-    TrainingGroupRepository trainingGroupRepository;
+    private TrainingGroupService trainingGroupService;
 
-
+    @Autowired
+    private ExerciseMapper exerciseMapper;
 
     @Transactional
-    public ExerciseDTO createExercise(ExerciseDTO exerciseDTO){
-
-        TrainingGroup searchTrainingGroup = trainingGroupRepository.findById(exerciseDTO.getTrainingGroupId()).orElseThrow(()
-                -> new EntityNotFoundException("Training Group not found"));
-
-        Exercise newExercise = new Exercise();
-        newExercise.setName(exerciseDTO.getName());
-        newExercise.setTrainingGroup(searchTrainingGroup);
-
-        exerciseRepository.save(newExercise);
-
-        return new ExerciseDTO(newExercise.getExerciseId(),
-                newExercise.getName(),
-                newExercise.getTrainingGroup().getTgId());
+    public ExerciseResponseDTO createExercise(ExerciseRequestDTO dto) {
+        TrainingGroup trainingGroup = trainingGroupService.findEntityById(dto.trainingGroupId());
+        Exercise entity = exerciseMapper.toEntity(dto, trainingGroup);
+        Exercise saved = exerciseRepository.save(entity);
+        return exerciseMapper.toDTO(saved);
     }
 
-    public List<ExerciseDTO> findAll() {
-        List<Exercise> exercises = exerciseRepository.findAll();
-
-        // Converte a lista de Entidades para uma lista de DTOs
-        return exercises.stream()
-                .map(e -> new ExerciseDTO(
-                        e.getExerciseId(),
-                        e.getName(),
-                        e.getTrainingGroup().getTgId()))
+    @Transactional(readOnly = true)
+    public List<ExerciseResponseDTO> findAll() {
+        return exerciseRepository.findAllWithTrainingGroup().stream()
+                .map(exerciseMapper::toDTO)
                 .toList();
     }
 
-
-    public List<ExerciseDTO> findByTrainingGroup(long search){
-        List<Exercise> exercises = exerciseRepository.findByTrainingGroup_TgId(search);
-        return exercises.stream()
-                .map(this::mapToDTO)
+    @Transactional(readOnly = true)
+    public List<ExerciseResponseDTO> findByTrainingGroup(long tgId) {
+        return exerciseRepository.findByTrainingGroupWithDetails(tgId).stream()
+                .map(exerciseMapper::toDTO)
                 .toList();
     }
 
-    public List<ExerciseDTO> findByName(String name) {
+    @Transactional(readOnly = true)
+    public List<ExerciseResponseDTO> findByName(String name) {
         return exerciseRepository.findByNameContainingIgnoreCase(name).stream()
-                .map(this::mapToDTO)
+                .map(exerciseMapper::toDTO)
                 .toList();
     }
 
-    public List<ExerciseDTO> findByMuscleGroupName(String muscleGroup) {
+    @Transactional(readOnly = true)
+    public List<ExerciseResponseDTO> findByMuscleGroupName(String muscleGroup) {
         return exerciseRepository.findByTrainingGroup_NameContainingIgnoreCase(muscleGroup).stream()
-                .map(this::mapToDTO)
+                .map(exerciseMapper::toDTO)
                 .toList();
     }
 
     @Transactional
-    public ExerciseDTO updateExercise(Long id, ExerciseDTO exerciseDTO) {
-        Exercise exercise = exerciseRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Exercise not found"));
-        
-        TrainingGroup trainingGroup = trainingGroupRepository.findById(exerciseDTO.getTrainingGroupId())
-                .orElseThrow(() -> new EntityNotFoundException("Training Group not found"));
-
-        exercise.setName(exerciseDTO.getName());
-        exercise.setTrainingGroup(trainingGroup);
-        
-        Exercise updatedExercise = exerciseRepository.save(exercise);
-        return mapToDTO(updatedExercise);
+    public ExerciseResponseDTO updateExercise(Long id, ExerciseRequestDTO dto) {
+        Exercise exercise = findEntityById(id);
+        TrainingGroup trainingGroup = trainingGroupService.findEntityById(dto.trainingGroupId());
+        exerciseMapper.updateEntity(exercise, dto, trainingGroup);
+        Exercise saved = exerciseRepository.save(exercise);
+        return exerciseMapper.toDTO(saved);
     }
 
     @Transactional
@@ -97,10 +78,12 @@ public class ExerciseService {
         exerciseRepository.deleteById(id);
     }
 
-    private ExerciseDTO mapToDTO(Exercise e) {
-        return new ExerciseDTO(
-                e.getExerciseId(),
-                e.getName(),
-                e.getTrainingGroup().getTgId());
+    public Exercise findEntityById(Long id) {
+        return exerciseRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Exercise not found"));
+    }
+
+    public List<Exercise> findAllEntitiesByIds(List<Long> ids) {
+        return exerciseRepository.findAllById(ids);
     }
 }

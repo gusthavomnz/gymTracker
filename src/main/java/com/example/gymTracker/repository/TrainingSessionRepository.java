@@ -13,16 +13,20 @@ import java.util.Optional;
 
 @Repository
 public interface TrainingSessionRepository extends JpaRepository<TrainingSession, Long> {
-    Page<TrainingSession> findByUserOrderByDateDesc(User user, Pageable pageable);
+
+    @Query(value = "SELECT ts FROM TrainingSession ts " +
+                   "JOIN FETCH ts.user " +
+                   "JOIN FETCH ts.trainingGroup " +
+                   "WHERE ts.user = :user " +
+                   "ORDER BY ts.date DESC",
+           countQuery = "SELECT COUNT(ts) FROM TrainingSession ts WHERE ts.user = :user")
+    Page<TrainingSession> findByUserWithDetailsOrderByDateDesc(@Param("user") User user, Pageable pageable);
 
     @Query("SELECT ts FROM TrainingSession ts " +
-            "JOIN FETCH ts.user " +
-            "JOIN FETCH ts.trainingGroup " +
-            "LEFT JOIN FETCH ts.exerciseSets es " +
-            "LEFT JOIN FETCH es.exercise " +
-            "WHERE ts.sessionId = :sessionId")
+           "JOIN FETCH ts.user " +
+           "JOIN FETCH ts.trainingGroup " +
+           "LEFT JOIN FETCH ts.exerciseSets es " +
+           "LEFT JOIN FETCH es.exercise " +
+           "WHERE ts.sessionId = :sessionId")
     Optional<TrainingSession> findFullSession(@Param("sessionId") Long sessionId);
-
-
-
 }

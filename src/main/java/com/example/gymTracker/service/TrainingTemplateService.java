@@ -1,14 +1,16 @@
 package com.example.gymTracker.service;
 
 import com.example.gymTracker.config.AuthService;
-import com.example.gymTracker.dto.TrainingTemplateDTO;
+import com.example.gymTracker.dto.request.TrainingTemplateRequestDTO;
+import com.example.gymTracker.dto.response.TrainingTemplateResponseDTO;
+import com.example.gymTracker.mapper.TrainingTemplateMapper;
 import com.example.gymTracker.model.Exercise;
 import com.example.gymTracker.model.TrainingTemplate;
 import com.example.gymTracker.model.User;
-import com.example.gymTracker.repository.ExerciseRepository;
 import com.example.gymTracker.repository.TrainingTemplateRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,29 +24,27 @@ public class TrainingTemplateService {
     private TrainingTemplateRepository trainingTemplateRepository;
 
     @Autowired
-    private ExerciseRepository exerciseRepository;
+    private ExerciseService exerciseService;
 
     @Autowired
     private AuthService authService;
 
+    @Autowired
+    private TrainingTemplateMapper trainingTemplateMapper;
+
     @Transactional
-    public TrainingTemplateDTO createTemplate(TrainingTemplateDTO dto) {
+    public TrainingTemplateResponseDTO createTemplate(TrainingTemplateRequestDTO dto) {
         User user = authService.getAuthenticatedUser();
-        List<Exercise> exercises = exerciseRepository.findAllById(dto.getExerciseIds());
-
-        TrainingTemplate template = new TrainingTemplate();
-        template.setName(dto.getName());
-        template.setUser(user);
-        template.setExercises(exercises);
-
-        TrainingTemplate saved = trainingTemplateRepository.save(template);
-        return mapToDTO(saved);
+        List<Exercise> exercises = exerciseService.findAllEntitiesByIds(dto.exerciseIds());
+        TrainingTemplate entity = trainingTemplateMapper.toEntity(dto, user, exercises);
+        TrainingTemplate saved = trainingTemplateRepository.save(entity);
+        return trainingTemplateMapper.toDTO(saved);
     }
 
-    public List<TrainingTemplateDTO> listMyTemplates() {
+    public List<TrainingTemplateResponseDTO> listMyTemplates() {
         User user = authService.getAuthenticatedUser();
-        return trainingTemplateRepository.findByUser(user).stream()
-                .map(this::mapToDTO)
+        return trainingTemplateRepository.findByUserWithExercises(user).stream()
+                .map(trainingTemplateMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
@@ -53,19 +53,11 @@ public class TrainingTemplateService {
         User user = authService.getAuthenticatedUser();
         TrainingTemplate template = trainingTemplateRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Template not found"));
-        
-        if (!template.getUser().getUserId().equals(user.getUserId())) {
-            throw new RuntimeException("Unauthorized");
-        }
-        
-        trainingTemplateRepository.delete(template);
-    }
 
-    private TrainingTemplateDTO mapToDTO(TrainingTemplate template) {
-        return new TrainingTemplateDTO(
-                template.getTemplateId(),
-                template.getName(),
-                template.getExercises().stream().map(Exercise::getExerciseId).collect(Collectors.toList())
-        );
+        if (!template.getUser().getUserId().equals(user.getUserId())) {
+            throw new AccessDeniedException("You do not have permission to delete this template");
+        }
+
+        trainingTemplateRepository.delete(template);
     }
 }

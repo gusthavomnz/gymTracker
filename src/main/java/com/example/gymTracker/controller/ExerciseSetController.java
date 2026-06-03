@@ -1,10 +1,11 @@
 package com.example.gymTracker.controller;
 
-
-import com.example.gymTracker.dto.ExerciseSetDTO;
+import com.example.gymTracker.dto.request.ExerciseSetRequestDTO;
+import com.example.gymTracker.dto.response.ExerciseSetResponseDTO;
 import com.example.gymTracker.service.ExerciseSetService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,7 +20,7 @@ public class ExerciseSetController {
     private ExerciseSetService exerciseSetService;
 
     @PostMapping
-    public ResponseEntity<ExerciseSetDTO> createSet(@RequestBody @Valid ExerciseSetDTO dto) {
-        return exerciseSetService.saveSet(dto);
+    public ResponseEntity<ExerciseSetResponseDTO> createSet(@RequestBody @Valid ExerciseSetRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(exerciseSetService.saveSet(dto));
     }
 }

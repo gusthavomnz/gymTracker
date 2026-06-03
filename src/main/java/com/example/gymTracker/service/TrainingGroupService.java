@@ -1,8 +1,10 @@
 package com.example.gymTracker.service;
 
-
-import com.example.gymTracker.dto.TrainingGroupDTO;
+import com.example.gymTracker.dto.request.TrainingGroupRequestDTO;
+import com.example.gymTracker.dto.response.TrainingGroupResponseDTO;
+import com.example.gymTracker.mapper.TrainingGroupMapper;
 import com.example.gymTracker.model.TrainingGroup;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.gymTracker.repository.TrainingGroupRepository;
@@ -11,29 +13,19 @@ import com.example.gymTracker.repository.TrainingGroupRepository;
 public class TrainingGroupService {
 
     @Autowired
-    TrainingGroupRepository trainingGroupRepository;
+    private TrainingGroupRepository trainingGroupRepository;
 
+    @Autowired
+    private TrainingGroupMapper trainingGroupMapper;
 
-public TrainingGroupDTO createTrainingGroup(TrainingGroupDTO trainingGroupDTO){
+    public TrainingGroupResponseDTO createTrainingGroup(TrainingGroupRequestDTO dto) {
+        TrainingGroup entity = trainingGroupMapper.toEntity(dto);
+        TrainingGroup saved = trainingGroupRepository.save(entity);
+        return trainingGroupMapper.toDTO(saved);
+    }
 
-    // CONVERTE DTO PARA ENTITY
-    TrainingGroup newTrainingGroup = new TrainingGroup();
-    newTrainingGroup.setName(trainingGroupDTO.getName());
-
-    // SALVA NO BD E CAPTURA
-    TrainingGroup savedGroup = trainingGroupRepository.save(newTrainingGroup);
-
-    // CONVERTE A CAPTURA EM DTO PARA RETORNAR
-    TrainingGroupDTO responseDTO = new TrainingGroupDTO(
-            savedGroup.getTgId(),
-            savedGroup.getName());
-
-    return responseDTO;
-}
-
-
-
-
-
-
+    public TrainingGroup findEntityById(Long id) {
+        return trainingGroupRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Training Group not found"));
+    }
 }
